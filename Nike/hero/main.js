@@ -56,9 +56,9 @@
     shoes.appendChild(img);
 
     var b = document.createElement('button');
-    b.className = 'thumb'; b.setAttribute('role','tab');
+    b.className = 'thumb'; b.type = 'button';
     b.setAttribute('aria-label', t.modelo + ' — ' + t.palavra);
-    b.setAttribute('aria-selected', i === 0 ? 'true' : 'false');
+    b.setAttribute('aria-pressed', i === 0 ? 'true' : 'false');
     b.innerHTML = '<span class="n">' + pad(i+1) + '</span><img src="' + t.img + '" alt="" draggable="false">';
     b.addEventListener('click', function(){ ir(i); });
     seletor.appendChild(b);
@@ -95,7 +95,7 @@
   }
 
   /* ── Troca de tênis ──────────────────────────────── */
-  var atual = 0, tl, auto;
+  var atual = 0, tl, auto, pronto = false, emCima = 0;
   var POSE = { x:0, y:0, rotation:-14, scale:1, opacity:1, filter:'blur(0px)' };
 
   function textos(t, i){
@@ -105,10 +105,12 @@
     linhas[0].textContent = t.l1;
     linhas[1].textContent = t.l2;
     aviso.textContent = (i+1) + ' de ' + TENIS.length + ': ' + t.modelo;
-    thumbs.forEach(function(b, j){ b.setAttribute('aria-selected', j === i ? 'true' : 'false'); });
+    thumbs.forEach(function(b, j){ b.setAttribute('aria-pressed', j === i ? 'true' : 'false'); });
+    imgs.forEach(function(img, j){ img.setAttribute('aria-hidden', j === i ? 'false' : 'true'); });
   }
 
   function ir(n, dir){
+    if(!pronto) return;
     n = (n + TENIS.length) % TENIS.length;
     if(n === atual) return;
     dir = dir || (n > atual ? 1 : -1);
@@ -151,20 +153,22 @@
     if(reduzido) return;
     auto = gsap.fromTo(barra, { scaleX:0 }, { scaleX:1, duration:TEMPO, ease:'none',
       onComplete:function(){ ir(atual + 1, 1); } });
+    if(emCima || document.hidden) auto.pause();
   }
   hero.querySelector('.next').addEventListener('click', function(){ ir(atual + 1, 1); });
   hero.querySelector('.prev').addEventListener('click', function(){ ir(atual - 1, -1); });
   document.addEventListener('keydown', function(e){
+    if(/input|textarea|select/i.test(e.target.tagName) || hero.getBoundingClientRect().bottom < 0) return;
     if(e.key === 'ArrowRight') ir(atual + 1, 1);
     if(e.key === 'ArrowLeft') ir(atual - 1, -1);
   });
   document.addEventListener('visibilitychange', function(){
     if(!auto) return;
-    document.hidden ? auto.pause() : auto.resume();
+    (document.hidden || emCima) ? auto.pause() : auto.resume();
   });
   [seletor, hero.querySelector('.ctas')].forEach(function(el){
-    el.addEventListener('mouseenter', function(){ auto && auto.pause(); });
-    el.addEventListener('mouseleave', function(){ auto && auto.resume(); });
+    el.addEventListener('mouseenter', function(){ emCima++; auto && auto.pause(); });
+    el.addEventListener('mouseleave', function(){ emCima = Math.max(0, emCima - 1); if(auto && !document.hidden) auto.resume(); });
   });
 
   /* swipe no celular */
@@ -224,7 +228,7 @@
       var forca = (alvoE - escala) * .22;
       vel = (vel + forca) * .72;
       escala += vel;
-      btn.style.transform = 'scale(' + escala + ')';
+      btn.style.scale = escala;
     });
   }
 
@@ -236,6 +240,7 @@
   if(reduzido){
     document.querySelector('.intro').remove();
     gsap.set(imgs[0], POSE);
+    pronto = true;
     word.textContent = t0.palavra;
     return;
   }
@@ -275,6 +280,7 @@
     .call(function(){
       document.body.classList.remove('intro-on');
       document.querySelector('.intro').remove();
+      pronto = true;
       reiniciarAuto();
     });
 
@@ -282,8 +288,9 @@
   var saida = gsap.timeline({
     scrollTrigger:{ trigger:hero, start:'top top', end:'bottom top', scrub:.6 }
   });
-  saida.to('.palco', { yPercent:18, scale:1.18, ease:'none' }, 0)
-       .to('.word', { yPercent:-35, opacity:.15, ease:'none' }, 0)
-       .to('.faixas', { yPercent:-20, ease:'none' }, 0)
-       .to(['.info', '.seletor', '.rodape-hero'], { opacity:0, y:-40, ease:'none' }, 0);
+  // .palco é centralizado com translate -50% -50%, que o GSAP converte em xPercent/yPercent
+  saida.fromTo('.palco', { xPercent:-50, yPercent:-50, scale:1 }, { xPercent:-50, yPercent:-32, scale:1.18, ease:'none' }, 0)
+       .fromTo('.word-wrap', { yPercent:0, opacity:1 }, { yPercent:-35, opacity:.15, ease:'none' }, 0)
+       .fromTo('.faixas', { xPercent:-50, yPercent:0 }, { xPercent:-50, yPercent:-20, ease:'none' }, 0)
+       .fromTo(['.info', '.seletor', '.rodape-hero'], { y:0, autoAlpha:1 }, { y:-40, autoAlpha:0, ease:'none', immediateRender:false }, 0);
 })();
