@@ -1,0 +1,76 @@
+/* ══════════════════════════════════════════════════════════
+   09 · CURSOR PERSONALIZADO
+   O ponto acompanha na hora e o anel chega depois. Essa diferença de atraso é o que dá a sensação de peso.
+   ══════════════════════════════════════════════════════════ */
+
+<!-- ── HTML ──────────────────────────────────────────── -->
+<div class="js-cursor">
+  <span class="ponto"></span>
+  <span class="anel"></span>
+</div>
+
+/* ── CSS DE APOIO ───────────────────────────────────── */
+.js-cursor{position:relative;width:100%;height:170px;border-radius:14px;border:1px dashed rgba(255,255,255,.14);overflow:hidden;cursor:none;display:flex;align-items:center;justify-content:center}
+.js-cursor .aviso{font-family:var(--ui);font-size:13px;color:var(--fg-dim)}
+.js-cursor .ponto{position:absolute;top:0;left:0;width:10px;height:10px;border-radius:50%;background:#fafafa;pointer-events:none;opacity:0}
+.js-cursor .anel{position:absolute;top:0;left:0;width:38px;height:38px;border-radius:50%;border:1px solid rgba(255,255,255,.5);pointer-events:none;opacity:0}
+
+/* ── JAVASCRIPT ─────────────────────────────────────── */
+FX.j09 = function(card){
+  var area = card.querySelector('.js-cursor');
+  var ponto = area.querySelector('.ponto');
+  var anel = area.querySelector('.anel');
+  var alvo = {x:0,y:0}, atual = {x:0,y:0}, dentro = false;
+  area.addEventListener('mousemove', function(ev){
+    var r = area.getBoundingClientRect();
+    alvo.x = ev.clientX - r.left; alvo.y = ev.clientY - r.top;
+    if(!dentro){ dentro = true; atual.x = alvo.x; atual.y = alvo.y;
+      ponto.style.opacity = anel.style.opacity = 1; }
+  });
+  area.addEventListener('mouseleave', function(){
+    dentro = false; ponto.style.opacity = anel.style.opacity = 0;
+  });
+  var parar = laco(card, function(){
+    ponto.style.transform = 'translate(' + (alvo.x-5) + 'px,' + (alvo.y-5) + 'px)';
+    atual.x = lerp(atual.x, alvo.x, .14);        /* o atraso mora aqui */
+    atual.y = lerp(atual.y, alvo.y, .14);
+    anel.style.transform = 'translate(' + (atual.x-19) + 'px,' + (atual.y-19) + 'px)';
+  });
+  return parar;
+};
+
+/* ── FERRAMENTAS USADAS POR ESTE EFEITO ─────────────── */
+var lerp = function(a,b,t){ return a + (b-a)*t; };
+var limitar = function(v,min,max){ return Math.max(min, Math.min(max, v)); };
+
+/* progresso de 0 a 1 de um elemento atravessando a área visível */
+function progressoNaTela(el){
+  var r = el.getBoundingClientRect();
+  var alt = window.innerHeight || 800;
+  return limitar((alt - r.top) / (alt + r.height), 0, 1);
+}
+
+/* laço de animação que só roda enquanto o elemento está visível */
+function laco(card, passo){
+  var id = null, vivo = false, respondeu = false;
+  function rodar(){ passo(); id = requestAnimationFrame(rodar); }
+  function ligar(){ if(!vivo){ vivo = true; rodar(); } }
+  function desligar(){ if(vivo){ vivo = false; cancelAnimationFrame(id); } }
+  var obs = new IntersectionObserver(function(e){
+    respondeu = true;
+    e[0].isIntersecting ? ligar() : desligar();
+  },{threshold:0});
+  obs.observe(card);
+  /* se o observador nao responder, comeca assim mesmo */
+  var espera = setTimeout(function(){ if(!respondeu) ligar(); }, 1500);
+  return function(){ clearTimeout(espera); cancelAnimationFrame(id); obs.disconnect(); };
+}
+
+/* ── COMO LIGAR ─────────────────────────────────────── */
+/* Troque "document" pelo elemento que envolve a animação,
+   se você tiver mais de uma cópia na mesma página. */
+FX.j09(document);
+
+/* Fonte: vitrine de 36 animações em JavaScript do canal Não Codei.
+   Cole no seu site ou entregue para uma inteligência artificial
+   pedindo para adaptar às cores e ao conteúdo da sua página. */

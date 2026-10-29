@@ -1,0 +1,40 @@
+/* ══════════════════════════════════════════════════════════
+   12 · LUZ QUE SEGUE O MOUSE
+   O JavaScript só escreve a posição do mouse em duas variáveis. O brilho em si é um gradiente do CSS lendo essas variáveis.
+   ══════════════════════════════════════════════════════════ */
+
+<!-- ── HTML ──────────────────────────────────────────── -->
+<div class="js-luz">passe o mouse</div>
+
+/* ── CSS DE APOIO ───────────────────────────────────── */
+.js-luz{
+  position:relative;width:230px;height:150px;border-radius:16px;overflow:hidden;
+  border:1px solid var(--border);background:var(--card2);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--ui);font-size:13px;color:var(--fg-muted);
+}
+.js-luz::before{
+  content:'';position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .3s;
+  background:radial-gradient(220px circle at var(--x,50%) var(--y,50%),rgba(255,255,255,.16),transparent 70%);
+}
+.js-luz:hover::before{opacity:1}
+
+/* ── JAVASCRIPT ─────────────────────────────────────── */
+FX.j12 = function(card){
+  card.querySelectorAll('.js-luz').forEach(function(el){
+    el.addEventListener('mousemove', function(ev){
+      var r = el.getBoundingClientRect();
+      el.style.setProperty('--x', (ev.clientX - r.left) + 'px');
+      el.style.setProperty('--y', (ev.clientY - r.top) + 'px');
+    });
+  });
+};
+
+/* ── COMO LIGAR ─────────────────────────────────────── */
+/* Troque "document" pelo elemento que envolve a animação,
+   se você tiver mais de uma cópia na mesma página. */
+FX.j12(document);
+
+/* Fonte: vitrine de 36 animações em JavaScript do canal Não Codei.
+   Cole no seu site ou entregue para uma inteligência artificial
+   pedindo para adaptar às cores e ao conteúdo da sua página. */

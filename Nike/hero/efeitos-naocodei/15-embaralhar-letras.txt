@@ -1,0 +1,39 @@
+/* ══════════════════════════════════════════════════════════
+   15 · EMBARALHAR LETRAS
+   As letras giram como um painel de aeroporto e vão travando da esquerda para a direita até formar a palavra.
+   ══════════════════════════════════════════════════════════ */
+
+<!-- ── HTML ──────────────────────────────────────────── -->
+<span class="js-scramble" data-texto="NAO CORTEI">NAO CORTEI</span>
+
+/* ── CSS DE APOIO ───────────────────────────────────── */
+.js-scramble{font-family:var(--mono);font-size:26px;font-weight:600;color:#fff;letter-spacing:.04em}
+
+/* ── JAVASCRIPT ─────────────────────────────────────── */
+FX.j15 = function(card){
+  var el = card.querySelector('.js-scramble');
+  var final = el.dataset.texto || el.textContent;
+  var sopa = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ#%&@*';
+  var quadro = 0, id;
+  function girar(){
+    var saida = '', travadas = Math.floor(quadro / 3);
+    for(var i=0; i<final.length; i++){
+      saida += i < travadas ? final[i]
+             : (final[i] === ' ' ? ' ' : sopa[(Math.random()*sopa.length)|0]);
+    }
+    el.textContent = saida;
+    quadro++;
+    if(travadas <= final.length) id = requestAnimationFrame(girar);
+  }
+  girar();
+  return function(){ cancelAnimationFrame(id); };
+};
+
+/* ── COMO LIGAR ─────────────────────────────────────── */
+/* Troque "document" pelo elemento que envolve a animação,
+   se você tiver mais de uma cópia na mesma página. */
+FX.j15(document);
+
+/* Fonte: vitrine de 36 animações em JavaScript do canal Não Codei.
+   Cole no seu site ou entregue para uma inteligência artificial
+   pedindo para adaptar às cores e ao conteúdo da sua página. */
