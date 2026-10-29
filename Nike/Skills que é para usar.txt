@@ -1,0 +1,18 @@
+Gsap
+Super Powers
+Figma
+playwright
+Supabase
+/ui-ux-pro-max
+UI/UX design intelligence for web, mobile, and desktop
+/gsap-core
+Official GSAP skill for the core API — gsap.to(), from(), fromTo(), easing, duration, stagger, defaults, gsap.matchMedia() (responsive, prefers-reduced-motion)
+/gsap-timeline
+Official GSAP skill for timelines — gsap.timeline(), position parameter, nesting, playback
+/gsap-scrolltrigger
+Official GSAP skill for ScrollTrigger — scroll-linked animations, pinning, scrub, triggers
+/gsap-plugins
+site-alto-nivel: sites e landing pages pra clientes
+copy-lp-vendas: copy de LP em 15 blocos
+estudio-criativo: sites premium, Instagram, Reels, prompts de vídeo
+respostas-enxutas: respostas curtas e diretas
